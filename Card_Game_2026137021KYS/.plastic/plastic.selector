@@ -1,0 +1,4 @@
+repository "Card_Game_2026137021KYS/Card_Game_2026137021KYS@14569721836157@cloud"
+  path "/"
+    br "/main"
+    co "/main"
