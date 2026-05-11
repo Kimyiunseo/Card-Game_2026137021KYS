@@ -1,71 +1,102 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class Card : MonoBehaviour
 {
-    [Header("UI")]
-    public Image backImage;
-    public TMP_Text frontText;
-    public Button button;
+    [Header("UI Images")]
+    [SerializeField] private Image frontImage;
+    [SerializeField] private Image backImage;
 
-    [Header("Card Data")]
-    public int cardValue;
+    [Header("Button")]
+    [SerializeField] private Button button;
+
+    private int cardId;
+    private bool isFlipped;
+    private bool isMatched;
 
     private CardGameManager gameManager;
-    private bool isFlipped = false;
-    private bool isMatched = false;
 
-    public void Setup(int value, CardGameManager manager)
+    public int CardId => cardId;
+    public bool IsFlipped => isFlipped;
+    public bool IsMatched => isMatched;
+
+    private void Awake()
     {
-        cardValue = value;
+        if (button == null)
+        {
+            button = GetComponent<Button>();
+        }
+
+        button.onClick.AddListener(OnCardClicked);
+    }
+
+    public void Initialize(int id, Sprite frontSprite, Sprite backSprite, CardGameManager manager)
+    {
+        cardId = id;
         gameManager = manager;
 
-        frontText.text = value.ToString();
+        frontImage.sprite = frontSprite;
+        backImage.sprite = backSprite;
 
         isFlipped = false;
         isMatched = false;
 
-        ShowBack();
+        button.interactable = true;
 
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(OnClickCard);
+        ShowBack();
     }
 
-    private void OnClickCard()
+    private void OnCardClicked()
     {
-        if (isFlipped) return;
-        if (isMatched) return;
+        if (gameManager == null)
+        {
+            return;
+        }
 
         gameManager.SelectCard(this);
     }
 
-    public void FlipOpen()
+    public void FlipToFront()
     {
-        isFlipped = true;
+        if (isMatched)
+        {
+            return;
+        }
 
-        backImage.gameObject.SetActive(false);
-        frontText.gameObject.SetActive(true);
+        isFlipped = true;
+        ShowFront();
     }
 
-    public void FlipClose()
+    public void FlipToBack()
     {
-        if (isMatched) return;
+        if (isMatched)
+        {
+            return;
+        }
 
         isFlipped = false;
-
         ShowBack();
+    }
+
+    public void SetMatched()
+    {
+        isMatched = true;
+        isFlipped = true;
+
+        ShowFront();
+
+        button.interactable = false;
+    }
+
+    private void ShowFront()
+    {
+        frontImage.gameObject.SetActive(true);
+        backImage.gameObject.SetActive(false);
     }
 
     private void ShowBack()
     {
+        frontImage.gameObject.SetActive(false);
         backImage.gameObject.SetActive(true);
-        frontText.gameObject.SetActive(false);
-    }
-
-    public void MatchAndRemove()
-    {
-        isMatched = true;
-        gameObject.SetActive(false);
     }
 }
